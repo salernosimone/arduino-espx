@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include "./Str.h"
+#include "./OpStatus.h"
 
 
 /**
@@ -58,14 +59,14 @@ extern "C" void callTask(void *arg) {
 /**
  * Multithreading with a fluent interface
  */
-class Threadx {
+class Threadx : public HasOpStatus {
 public:
 
     /**
      * Create thread with default configs
      * @param task
      */
-    int operator()(ThreadxTask task) {
+    OpStatus& operator()(ThreadxTask task) {
         defaultConfig();
 
         return handle(task);
@@ -77,7 +78,7 @@ public:
      * @return
      */
     template<typename... KWArgs>
-    int operator()(ThreadxTask task, KWArgs... kwargs) {
+    OpStatus& operator()(ThreadxTask task, KWArgs... kwargs) {
         defaultConfig();
 
         return handle(task, kwargs...);
@@ -194,7 +195,7 @@ protected:
      * No more kwargs to handle, create thread
      * @param task
      */
-    int handle(ThreadxTask task) {
+    OpStatus& handle(ThreadxTask task) {
         // actually create thread
         ThreadxTaskWrapper *wrapper = new ThreadxTaskWrapper(
             config.identifier,
@@ -214,12 +215,10 @@ protected:
                 config.core
         );
 
-        return 0;
+        if (statusCode != pdPASS)
+            return status.failWithCode("Can't pin task", statusCode);
 
-//        if (statusCode != pdPASS)
-//            return status.failWithCode("Can't pin task", statusCode);
-//
-//        return status.succeed();
+        return status.succeed();
     }
 
     /**
@@ -231,7 +230,7 @@ protected:
      * @param kwargs
      */
     template<typename T, typename... KWArgs>
-    int handle(ThreadxTask task, T arg, KWArgs... kwargs) {
+    OpStatus& handle(ThreadxTask task, T arg, KWArgs... kwargs) {
         arg(&config);
 
         return handle(task, kwargs...);
