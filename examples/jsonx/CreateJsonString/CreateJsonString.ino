@@ -1,15 +1,19 @@
+/**
+ * Generate JSON string
+ */
 #include <espx.h>
 #include <espx/jsonx.h>
 
 
-// stream JSON to Serial
-Jsonx jsonx(Serial);
+// save JSON into a String
+StringIO buffer;
+Jsonx jsonx(buffer);
 
 
 void setup() {
   delay(1000);
   Serial.begin(115200);
-  Serial.println("JSONx example: print to Serial");
+  Serial.println("JSONx example: write to String");
 }
 
 
@@ -37,5 +41,10 @@ void loop() {
     )
   });
 
+  Serial.print("JSON value: ");
+  Serial.println(buffer.value());
+
+  // clear buffer, otherwise JSON gets appended
+  buffer.clear();
   delay(2000);
 }

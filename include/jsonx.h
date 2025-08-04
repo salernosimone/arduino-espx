@@ -52,7 +52,7 @@ public:
             field.emit(*out);
             first = false;
         }
-        out->println('}');
+        out->print('}');
     }
 
     /**

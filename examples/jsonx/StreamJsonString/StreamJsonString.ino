@@ -1,8 +1,10 @@
+/**
+ * Stream JSON to Serial (no memory allocation)
+ */
 #include <espx.h>
 #include <espx/jsonx.h>
 
 
-// stream JSON to Serial
 Jsonx jsonx(Serial);
 
 
