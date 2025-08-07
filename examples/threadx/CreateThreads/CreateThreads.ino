@@ -61,12 +61,10 @@ void setup() {
 
 void loop() {
   // cancel thread on user input
-  Serial.println("Do you want to abort HelloWorldThread? (yes|no)");
-  String answer = Serial.readString();
+  String answer = promptString("Do you want to abort HelloWorldThread? (yes|no)");
 
   if (answer.startsWith("yes")) {
     Serial.println("Aborting thread...");
-    Serial.setTimeout(60000);
     vTaskDelete(handle);
   }
 }

@@ -71,6 +71,34 @@ public:
         return s;
     }
 
+    /**
+     *
+     * @return
+     */
+    const char *c_str() {
+        return s.c_str();
+    }
+
+    /**
+     *
+     * @return
+     */
+    Str& lower() {
+        s.toLowerCase();
+
+        return *this;
+    }
+
+    /**
+     *
+     * @return
+     */
+    Str& upper() {
+        s.toUpperCase();
+
+        return *this;
+    }
+
 
     /**
      * Test if string contains other string
@@ -107,7 +135,7 @@ public:
         const float value = s.toFloat();
         Str other(s);
 
-        other.s.toLowerCase();
+        other.lower();
 
         if (other.contains("g"))
             return value * 1073741824ULL;
@@ -129,7 +157,7 @@ public:
         const float value = s.toFloat();
         Str other(s);
 
-        other.s.toLowerCase();
+        other.lower();
 
         if (other.endsWith("ms") || other.contains("milli"))
             return value;

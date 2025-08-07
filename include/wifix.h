@@ -60,6 +60,7 @@ public:
      */
     template<typename T, typename... KWArgs>
     Wifix &operator()(const String &ssid, const String &pass, T arg, KWArgs... kwargs) {
+        defaultConfig();
         handleConfig(arg, kwargs...);
 
         return connect(ssid.c_str(), pass.c_str());

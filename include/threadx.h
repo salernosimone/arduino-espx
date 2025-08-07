@@ -77,11 +77,12 @@ public:
      * @param task
      * @return
      */
-    template<typename... KWArgs>
-    OpStatus& operator()(ThreadxTask task, KWArgs... kwargs) {
+    template<typename T, typename... KWArgs>
+    OpStatus& operator()(ThreadxTask task, T arg, KWArgs... kwargs) {
         defaultConfig();
+        handleConfig(arg, kwargs...);
 
-        return handle(task, kwargs...);
+        return handle(task);
     }
 
     /**
@@ -192,6 +193,27 @@ protected:
     }
 
     /**
+     * Stop condition
+     */
+    void handleConfig() {
+
+    }
+
+    /**
+     * Handle one kwarg at a time
+     * @tparam T
+     * @tparam KWArgs
+     * @param arg
+     * @param kwargs
+     */
+    template<typename T, typename... KWArgs>
+    void handleConfig(T arg, KWArgs... kwargs) {
+        arg(&config);
+
+        handleConfig(kwargs...);
+    }
+
+    /**
      * No more kwargs to handle, create thread
      * @param task
      */
@@ -219,21 +241,6 @@ protected:
             return status.failWithCode("Can't pin task", statusCode);
 
         return status.succeed();
-    }
-
-    /**
-     * Handle one kwarg at a time
-     * @tparam T
-     * @tparam KWArgs
-     * @param task
-     * @param arg
-     * @param kwargs
-     */
-    template<typename T, typename... KWArgs>
-    OpStatus& handle(ThreadxTask task, T arg, KWArgs... kwargs) {
-        arg(&config);
-
-        return handle(task, kwargs...);
     }
 };
 
