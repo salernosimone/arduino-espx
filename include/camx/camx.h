@@ -4,10 +4,12 @@
 #include "./pixformat.h"
 #include "./resolution.h"
 #include "./model.h"
+#include "./quality.h"
 
 using espx::camx::Pixformat;
 using espx::camx::Resolution;
 using espx::camx::Model;
+using espx::camx::Quality;
 
 /**
  * Use camera with a fluent interface
@@ -18,6 +20,7 @@ public:
     Pixformat pixformat;
     Resolution resolution;
     Model model;
+    Quality quality;
 
     Camx() {
         defaultConfig();
@@ -36,6 +39,7 @@ public:
 
         config.pixel_format = pixformat.format;
         config.frame_size = resolution.framesize;
+        config.jpeg_quality = quality.quality;
         config.pin_d0 = model.pinout->d0;
         config.pin_d1 = model.pinout->d1;
         config.pin_d2 = model.pinout->d2;
