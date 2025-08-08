@@ -97,6 +97,14 @@ public:
     }
 
     /**
+     *
+     * @return
+     */
+    inline String& failure() {
+        return status.reason;
+    }
+
+    /**
      * Enter an endless loop on error
      */
     void raise() {

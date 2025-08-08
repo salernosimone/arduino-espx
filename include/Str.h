@@ -175,6 +175,14 @@ public:
     }
 
     /**
+     * Parse `...%`
+     * @return
+     */
+    float percent() {
+        return s.toFloat() / 100;
+    }
+
+    /**
      * Join parts (stop condition)
      * @tparam T
      * @param glue

@@ -1,5 +1,7 @@
+#include <JPEGDEC.h>
 #include <espx.h>
 #include <espx/camx.h>
+
 
 void setup() {
     delay(1000);
@@ -17,11 +19,14 @@ void setup() {
     camx.begin().raise();
 }
 
-void loop() {
-    Serial.println("loop");
-    auto fb = esp_camera_fb_get();
 
-    Serial.printf("Frame size: %d", fb->len);
-    esp_camera_fb_return(fb);
-    delay(2000);
+void loop() {
+    auto frame = camx.grab();
+
+    if (!frame) {
+      Serial.println(frame.failure());
+      return;
+    }
+
+    Serial.printf("Frame size: %d bytes\n", frame.length);
 } 

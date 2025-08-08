@@ -5,11 +5,13 @@
 #include "./resolution.h"
 #include "./model.h"
 #include "./quality.h"
+#include "./image.h"
 
 using espx::camx::Pixformat;
 using espx::camx::Resolution;
 using espx::camx::Model;
 using espx::camx::Quality;
+using espx::camx::Image;
 
 /**
  * Use camera with a fluent interface
@@ -17,12 +19,17 @@ using espx::camx::Quality;
 class Camx : public HasOpStatus {
 public:
     camera_config_t config;
+    camera_fb_t *fb;
     Pixformat pixformat;
     Resolution resolution;
     Model model;
     Quality quality;
+    Image frame;
 
-    Camx() {
+    /**
+     * Constructor
+     */
+    Camx() : fb(NULL), frame(NULL, 0, 0, 0) {
         defaultConfig();
     }
 
@@ -66,6 +73,37 @@ public:
         status.succeed();
 
         return *this;
+    }
+
+    /**
+     * Take picture
+     */
+    Image& grab() {
+        free();
+
+        fb = esp_camera_fb_get();
+
+        if (fb != NULL) {
+            frame.buf = fb->buf;
+            frame.length = fb->len;
+            // don't trust the fb dimensions!
+            frame.width = resolution.width;
+            frame.height = resolution.height;
+        }
+
+        return frame;
+    }
+
+    /**
+     * Release frame memory
+     */
+    void free() {
+        if (fb != NULL) {
+            esp_camera_fb_return(fb);
+            fb = NULL;
+        }
+
+        frame.free();
     }
 
 protected:
