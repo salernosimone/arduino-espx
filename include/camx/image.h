@@ -9,8 +9,16 @@ namespace espx::camx {
     public:
         uint8_t *buf;
         size_t length;
+        size_t t;
         uint16_t width;
         uint16_t height;
+
+        /**
+         * Constructor
+         */
+        Image() : buf(NULL), length(0), t(0), width(0), height(0) {
+
+        }
 
         /**
          * Constructor
@@ -35,9 +43,19 @@ namespace espx::camx {
         void free() {
             buf = NULL;
             length = 0;
+            t = 0;
             width = 0;
             height = 0;
         }
+
+        /**
+         *
+         * @param timestamp
+         */
+        void timestamp(struct timeval tm) {
+            t = (size_t) tm.tv_sec * 1000LL + tm.tv_usec / 1000;
+        }
+
     protected:
     };
 }

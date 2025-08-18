@@ -245,6 +245,14 @@ protected:
 
 /**
  * Str factory
+ * @return
+ */
+Str str() {
+    return Str("");
+}
+
+/**
+ * Str factory
  * @param s
  * @return
  */

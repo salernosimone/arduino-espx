@@ -1,6 +1,9 @@
 #pragma once
 #include <esp_camera.h>
+#include <esp_heap_caps.h>
+#include <esp32-hal-psram.h>
 #include "../OpStatus.h"
+#include "../threadx.h"
 #include "./pixformat.h"
 #include "./resolution.h"
 #include "./model.h"
@@ -25,11 +28,12 @@ public:
     Model model;
     Quality quality;
     Image frame;
+    QueueHandle_t queue;
 
     /**
      * Constructor
      */
-    Camx() : fb(NULL), frame(NULL, 0, 0, 0) {
+    Camx() : fb(NULL), mutex(NULL), runningInBackground(false) {
         defaultConfig();
     }
 
@@ -64,12 +68,22 @@ public:
         config.pin_pwdn = model.pinout->pwdn;
         config.pin_reset = model.pinout->reset;
 
+        if (psramFound() && config.fb_count == 0) {
+            config.fb_count = 2;
+            config.fb_location = CAMERA_FB_IN_PSRAM;
+        }
+
+        if (config.fb_count == 0)
+            config.fb_count = 1;
+
         if (esp_camera_init(&config) != ESP_OK) {
             status.fail("esp_camera_init() failed");
 
             return *this;
         }
 
+        mutex = xSemaphoreCreateMutex();
+        queue = xQueueCreate(1, sizeof(Image*));
         status.succeed();
 
         return *this;
@@ -79,6 +93,9 @@ public:
      * Take picture
      */
     Image& grab() {
+        if (!lock(30))
+            return frame;
+
         free();
 
         fb = esp_camera_fb_get();
@@ -86,10 +103,15 @@ public:
         if (fb != NULL) {
             frame.buf = fb->buf;
             frame.length = fb->len;
+            frame.timestamp(fb->timestamp);
             // don't trust the fb dimensions!
             frame.width = resolution.width;
             frame.height = resolution.height;
+            // TODO: push frame to queue
+//            xQueueSendToFront(queue, (void *) (&frame), pdMS_TO_TICKS(10));
         }
+
+        unlock();
 
         return frame;
     }
@@ -106,7 +128,62 @@ public:
         frame.free();
     }
 
+    /**
+     * Run camera capture in the background
+     */
+    void runInBackground() {
+        if (runningInBackground)
+            return;
+
+        threadx([](void *userdata) {
+            Camx *self = (Camx*) userdata;
+            size_t capturedAt = 0;
+
+            while (true) {
+                const size_t now = millis();
+
+                // cap at 30 FPS
+                if (now >= capturedAt && now < capturedAt + 33) {
+                    delay(5);
+                    continue;
+                }
+
+                self->grab();
+                capturedAt = millis();
+            }
+        }, threadx.Important(), threadx.Userdata(this));
+
+        runningInBackground = true;
+    }
+
+    /**
+     * Peek frame from queue
+     */
+    void peek() {
+        xQueuePeek(queue, &frame, pdMS_TO_TICKS(30));
+    }
+
+    /**
+     * Acquire semaphore
+     * @return
+     */
+    bool lock(size_t timeout = 100) {
+        if (xSemaphoreTake(mutex, pdMS_TO_TICKS(timeout)) == pdTRUE)
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Release semaphore
+     */
+    void unlock() {
+        xSemaphoreGive(mutex);
+    }
+
 protected:
+    bool runningInBackground;
+    SemaphoreHandle_t mutex;
 
     /**
      *
@@ -114,7 +191,7 @@ protected:
     void defaultConfig() {
         config.pin_d0 = 0;
         config.pin_d1 = 0;
-        config.fb_count = 1;
+        config.fb_count = 0;
         config.xclk_freq_hz = 20000000ULL;
         config.grab_mode = CAMERA_GRAB_LATEST;
         config.ledc_channel = LEDC_CHANNEL_0;
