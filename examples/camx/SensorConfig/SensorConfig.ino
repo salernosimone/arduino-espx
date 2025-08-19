@@ -1,5 +1,6 @@
 /**
- * Create a MJPEG HTTP server
+ * Configure sensor.
+ * Boot the MJPEG server to visually inspect tha changes.
  */
 #include <espx.h>
 #include <espx/wifix.h>
@@ -11,26 +12,27 @@
 void setup() {
     delay(1000);
     Serial.begin(115200);
-    Serial.println("Camx example: MJPEG server");
+    Serial.println("Camx example: sensor config");
 
     // configure camx through Serial Monitor
     camx.model.prompt();
     camx.pixformat.jpeg();
     camx.quality.high();
     camx.resolution.qvga();
-
-    // initialize camx,
-    // enter endless loop on error
     camx.begin().raise();
 
-    // connect to WiFi and set hostname
-    // to avoid using the IP address of the board:
-    // server will be available at http://esp32cam.local
+    // configure sensor AFTER camera init!
+    // (use IDE autocomplete suggestions to explore all options)
+    camx.sensor.flipHor();
+    camx.sensor.flipVert();
+    camx.sensor.saturation(Intensity::high);
+    camx.sensor.brightness(Intensity::base);
+    // always remember to apply() the settings!
+    camx.sensor.apply();
+
+    // start mjpeg server
     wifix("SSID", "PASSWORD").raise();
     mdnsx("esp32cam");
-
-    // start MJPEG server
-    // (turn on INFO logging to see messages from server)
     mjpegx.listenOn(80);
     mjpegx.begin().raise();
 }

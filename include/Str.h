@@ -32,6 +32,18 @@ public:
     }
 
     /**
+     *
+     * @tparam T
+     * @param key
+     * @param val
+     * @return
+     */
+    template<typename T>
+    static Str keyval(const char *key, T val) {
+        return Str(key).concat('=', val);
+    }
+
+    /**
      * Constructor
      * @param initialValue
      */
@@ -183,6 +195,29 @@ public:
     }
 
     /**
+     * Parse intensity scale (lowest, low, base, high, highest)
+     * @return
+     */
+    int8_t intensity() {
+        if (contains("lowest"))
+            return -2;
+
+        if (contains("highest"))
+            return 2;
+
+        if (contains("low"))
+            return -1;
+
+        if (contains("base"))
+            return 0;
+
+        if (contains("high"))
+            return 1;
+
+        return s.toInt();
+    }
+
+    /**
      * Join parts (stop condition)
      * @tparam T
      * @param glue
@@ -237,6 +272,51 @@ public:
         concat(value);
 
         return concat(args...);
+    }
+
+    /**
+     * Extract numeric value of key (`key=value`)
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    float valueOf(const char *key, float defaultValue = 0) {
+        String k(key);
+
+        k += '=';
+
+        const int16_t pos = s.indexOf(k);
+
+        if (pos < 0)
+            return defaultValue;
+
+        const String sub = s.substring(pos + k.length());
+
+        return sub.toFloat();
+    }
+
+    /**
+     * Extract string value of key (`key=value`)
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    String valueOf(const char *key, String defaultValue = "") {
+        String k(key);
+
+        k += '=';
+
+        const uint16_t start = s.indexOf(k);
+
+        if (start < 0)
+            return defaultValue;
+
+        int16_t end = s.indexOf(' ', start + k.length());
+
+        if (end < 0)
+            end = s.length();
+
+        return s.substring(start + k.length(), end);
     }
 
 protected:

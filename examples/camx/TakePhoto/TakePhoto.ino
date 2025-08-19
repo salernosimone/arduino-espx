@@ -1,4 +1,6 @@
-#include <JPEGDEC.h>
+/**
+ * Take a picture
+ */
 #include <espx.h>
 #include <espx/camx.h>
 

@@ -8,10 +8,12 @@
 #include "./resolution.h"
 #include "./model.h"
 #include "./quality.h"
+#include "./sensor.h"
 #include "./image.h"
 
 using espx::camx::Pixformat;
 using espx::camx::Resolution;
+using espx::camx::Sensor;
 using espx::camx::Model;
 using espx::camx::Quality;
 using espx::camx::Image;
@@ -27,6 +29,7 @@ public:
     Resolution resolution;
     Model model;
     Quality quality;
+    Sensor sensor;
     Image frame;
     QueueHandle_t queue;
 
@@ -85,6 +88,8 @@ public:
         mutex = xSemaphoreCreateMutex();
         queue = xQueueCreate(1, sizeof(Image*));
         status.succeed();
+
+        sensor.begin(config.frame_size);
 
         return *this;
     }
