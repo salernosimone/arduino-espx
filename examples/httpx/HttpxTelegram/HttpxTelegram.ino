@@ -1,0 +1,96 @@
+/**
+* Send text to Telegram bot with httpx
+*/
+#include <espx.h>
+#include <espx/wifix.h>
+#include <espx/httpx.h>
+#include <espx/jsonx.h>
+
+static const char TELEGRAM_CERT[] PROGMEM = R"EOF(
+-----BEGIN CERTIFICATE-----
+MIIEADCCAuigAwIBAgIBADANBgkqhkiG9w0BAQUFADBjMQswCQYDVQQGEwJVUzEh
+MB8GA1UEChMYVGhlIEdvIERhZGR5IEdyb3VwLCBJbmMuMTEwLwYDVQQLEyhHbyBE
+YWRkeSBDbGFzcyAyIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA0MDYyOTE3
+MDYyMFoXDTM0MDYyOTE3MDYyMFowYzELMAkGA1UEBhMCVVMxITAfBgNVBAoTGFRo
+ZSBHbyBEYWRkeSBHcm91cCwgSW5jLjExMC8GA1UECxMoR28gRGFkZHkgQ2xhc3Mg
+MiBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTCCASAwDQYJKoZIhvcNAQEBBQADggEN
+ADCCAQgCggEBAN6d1+pXGEmhW+vXX0iG6r7d/+TvZxz0ZWizV3GgXne77ZtJ6XCA
+PVYYYwhv2vLM0D9/AlQiVBDYsoHUwHU9S3/Hd8M+eKsaA7Ugay9qK7HFiH7Eux6w
+wdhFJ2+qN1j3hybX2C32qRe3H3I2TqYXP2WYktsqbl2i/ojgC95/5Y0V4evLOtXi
+EqITLdiOr18SPaAIBQi2XKVlOARFmR6jYGB0xUGlcmIbYsUfb18aQr4CUWWoriMY
+avx4A6lNf4DD+qta/KFApMoZFv6yyO9ecw3ud72a9nmYvLEHZ6IVDd2gWMZEewo+
+YihfukEHU1jPEX44dMX4/7VpkI+EdOqXG68CAQOjgcAwgb0wHQYDVR0OBBYEFNLE
+sNKR1EwRcbNhyz2h/t2oatTjMIGNBgNVHSMEgYUwgYKAFNLEsNKR1EwRcbNhyz2h
+/t2oatTjoWekZTBjMQswCQYDVQQGEwJVUzEhMB8GA1UEChMYVGhlIEdvIERhZGR5
+IEdyb3VwLCBJbmMuMTEwLwYDVQQLEyhHbyBEYWRkeSBDbGFzcyAyIENlcnRpZmlj
+YXRpb24gQXV0aG9yaXR5ggEAMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQAD
+ggEBADJL87LKPpH8EsahB4yOd6AzBhRckB4Y9wimPQoZ+YeAEW5p5JYXMP80kWNy
+OO7MHAGjHZQopDH2esRU1/blMVgDoszOYtuURXO1v0XJJLXVggKtI3lpjbi2Tc7P
+TMozI+gciKqdi0FuFskg5YmezTvacPd+mSYgFFQlq25zheabIZ0KbIIOqPjCDPoQ
+HmyW74cNxA9hi63ugyuV+I6ShHI56yDqg+2DzZduCLzrTia2cyvk0/ZM/iZx4mER
+dEr/VxqHD3VILs9RaRegAhJhldXRQLIQTO7ErBBDpqWeCtWVYpoNz4iCxTIM5Cuf
+ReYNnyicsbkqWletNw+vHX/bvZ8=
+-----END CERTIFICATE-----
+)EOF";
+
+
+String botToken;
+
+
+void setup() {
+    delay(1000);
+    Serial.begin(115200);
+    Serial.println("Httpx example: send text to Telegram bot");
+
+    // connect to WiFi
+    wifix("SSID", "PASSWORD").raise();
+
+    // get bot token once
+    botToken = promptString("Enter bot token: ");
+}
+
+void loop() {
+    const String recipient = promptString("Enter recipient id");
+    const String message = promptString("Enter message");
+
+    // use jsonx to construct payload
+    StringIO payload;
+    Jsonx jsonx(payload);
+
+    jsonx.rootObject({
+        jsonx.scalar("chat_id", recipient.c_str()),
+        jsonx.scalar("text", message.c_str())
+    });
+
+    Serial.print("Payload: ");
+    Serial.println(payload.value());
+
+    // POST request
+    // SSL cert verification
+    // timeout after 5 seconds
+    // Accept json header
+    // Content Type json header
+    auto response = httpx.run(
+        String("https://api.telegram.org/bot") + botToken + "/sendMessage",
+        // configurations go first
+        httpx.Cert(TELEGRAM_CERT),
+        httpx.RequestTimeout("5s"),
+        // then headers
+        httpx.Header("Accept", "application/json"),
+        httpx.Header("Content-Type", "application/json"),
+        // Body() MUST be the last
+        httpx.Body("POST", payload.c_str())
+    );
+
+    if (!response) {
+        // request failed
+        Serial.print("Request failed with reason: ");
+        Serial.println(response.failure());
+    }
+    else {
+        // request was ok
+        Serial.printf("Response[%d]\n%s\n", response.code, response.text().c_str());
+    }
+
+    delay(5000);
+}

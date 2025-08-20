@@ -19,7 +19,7 @@ public:
      * Convert to boolean
      * @return
      */
-    operator bool() const {
+    virtual operator bool() const {
         return succeeded();
     }
 
@@ -92,8 +92,16 @@ public:
      *
      * @return
      */
-    inline bool failed() const {
+    virtual inline bool failed() const {
         return status.failed();
+    }
+
+    /**
+     *
+     * @return
+     */
+    virtual inline bool succeeded() const {
+        return !failed();
     }
 
     /**

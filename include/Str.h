@@ -165,7 +165,7 @@ public:
      * Parse string as (file) weight (kb, mb...)
      * @return
      */
-    size_t millis() {
+    size_t millis() const {
         const float value = s.toFloat();
         Str other(s);
 

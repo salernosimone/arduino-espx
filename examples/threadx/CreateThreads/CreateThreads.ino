@@ -38,13 +38,16 @@ void setup() {
       String name = *((String*) userdata);
 
       while (true) {
-          Serial.print("Inside fully configured thread. Name: ");
+          Serial.print("Inside fully configured thread. My name is: ");
           Serial.println(name);
           delay(2000);
       }
     },
+    // give a name to the thread
     threadx.Name("HelloWorldThread"),
+    // choose which core will run on (0 or 1)
     threadx.Core(1),
+    // how much RAM to give the thread
     threadx.Stack("5 kb"),
     // you can choose between
     // - NotImportant (priority = 0)
@@ -52,6 +55,7 @@ void setup() {
     // - Critical (priority = MAX)
     threadx.Important(),
     // Userdata is passed as first argument to the task function
+    // (must be a pointer)
     threadx.Userdata(&name),
     // bind thread to handler (see loop)
     threadx.Handler(handle)

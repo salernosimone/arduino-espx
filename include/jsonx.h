@@ -111,31 +111,6 @@ public:
     }
 
     /**
-     * List attribute
-     * @param key
-     * @param items
-     * @return
-     */
-    /*Node list(const char* key, std::initializer_list<Node> items) {
-        return Node([=](Print& o) {
-            printQuoted(o, key);
-            o.print(':');
-            emitList(o, items);
-        });
-    }*/
-
-    /**
-     * List value
-     * @param items
-     * @return
-     */
-    /*Node list(std::initializer_list<Node> items) {
-        return Node([=](Print& o) {
-            emitList(o, items);
-        });
-    }*/
-
-    /**
      * List value
      * @tparam Args
      * @param args
@@ -172,7 +147,7 @@ public:
      * @param value
      * @return
      */
-    Node string(const char* key, const String& value) {
+    Node string(const char* key, String value) {
         return Node([=](Print& o) {
             printQuoted(o, key);
             o.print(':');
@@ -393,16 +368,7 @@ private:
      * @param o
      * @param value
      */
-    static void emitSingle(Print& o, float value) {
-        o.print(value, 6);
-    }
-
-    /**
-     *
-     * @param o
-     * @param value
-     */
     static void emitSingle(Print& o, double value) {
-        o.print(value, 6);
+        o.print(value, 8);
     }
 };

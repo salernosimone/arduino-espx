@@ -23,6 +23,14 @@ public:
 
     /**
      *
+     * @return
+     */
+    const char *c_str() {
+        return s.c_str();
+    }
+
+    /**
+     *
      */
     void clear() {
         s = "";
