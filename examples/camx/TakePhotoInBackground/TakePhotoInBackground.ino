@@ -30,11 +30,11 @@ void loop() {
   // camera capture is locked behind a semaphore:
   // to read the current frame, we need to acquire it
   if (camx.lock()) {
-    ESP_LOGI("Main", "Current frame size: %d bytes, timestamp: %u", camx.frame.length, camx.frame.t);
+    Serial.printf("Current frame size: %d bytes, timestamp: %u\n", camx.frame.length, camx.frame.t);
     // finally, release the lock
     camx.unlock();
     delay(30);
   }
 
-  delay(1);
+  delay(10);
 }
