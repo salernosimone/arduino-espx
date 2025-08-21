@@ -48,6 +48,7 @@ public:
             return false;
 
         throttle.touch();
+
         return true;
     }
 

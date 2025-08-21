@@ -49,8 +49,12 @@ void loop() {
         return;
     }
 
-    ESP_LOGD("Motionx", "moving=%.2f, time=%dms\n", motionx.ratio(), motionx.execTime());
+    Serial.printf(
+            "moving pixels %%=%.2f, detection time=%dms\n",
+            motionx.ratio(), motionx.stopwatch.millis()
+    );
 
+    // motionx is true if ratio >= threshold
     if (motionx) {
       Serial.println("Motion detected");
     }

@@ -3,6 +3,8 @@
 #include "../helpers.h"
 #include "../ByteArray.h"
 #include "../OpStatus.h"
+#include "../Stopwatch.h"
+
 
 namespace espx::camx {
     /**
@@ -12,6 +14,7 @@ namespace espx::camx {
     class Jdecoder : public HasOpStatus {
     public:
         JPEGDEC jpegdec;
+        Stopwatch stopwatch;
 
         /**
          *
@@ -20,15 +23,7 @@ namespace espx::camx {
             defaults();
         }
 
-        /**
-         *
-         */
-        inline size_t execTime() const {
-            return executionTime;
-        }
-
     protected:
-        size_t executionTime;
         struct {
             uint16_t width;
             uint16_t height;
@@ -87,7 +82,7 @@ namespace espx::camx {
         OpStatus& decode(uint8_t *buf, size_t len) {
             dimensions.width = 0;
             dimensions.height = 0;
-            executionTime = millis();
+            stopwatch.start();
 
             // open
             bool openOk = openFlash(buf, len);
@@ -119,7 +114,7 @@ namespace espx::camx {
             else {
                 status.succeed();
                 onDecodeSuccess();
-                executionTime = millis() - executionTime;
+                stopwatch.stop();
             }
 
             return status;
@@ -141,7 +136,6 @@ namespace espx::camx {
          * Set defaults config
          */
         void defaults() {
-            executionTime = 0;
             dimensions.width = 0;
             dimensions.height = 0;
             jconfig.scale = 1;

@@ -27,7 +27,7 @@ namespace espx::camx {
         Mjpegx& begin() {
             ::camx.runInBackground();
             Serverx::begin();
-            ESP_LOGI("Mjpegx", "MJPEG server available at http://%s", ip.c_str());
+            ESP_LOGI("Mjpegx", "MJPEG server available at http://%s:%d", ip.c_str(), sconfig.port);
 
             return *this;
         }
