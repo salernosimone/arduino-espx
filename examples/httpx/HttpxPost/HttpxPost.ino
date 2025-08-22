@@ -41,8 +41,12 @@ void loop() {
     }
     else {
         // request was ok
-        Serial.printf("Response[%d]\n%s\n", response.code, response.text().c_str());
+        Serial.printf("Response [%d]\n", response.code);
+        Serial.println(response.text());
     }
+
+    // end connection
+    httpx.end();
 
     delay(5000);
 }

@@ -28,6 +28,13 @@ public:
     }
 
     /**
+     * End connection
+     */
+    inline void end() {
+        httpClient.end();
+    }
+
+    /**
      *
      * @param url
      * @return
@@ -35,7 +42,7 @@ public:
     template<typename... Args>
     HttpxResponse& run(String url, HttpxHandler handler, Args... handlers) {
         responseCode = 0;
-        httpClient.end();
+        end();
 
         if (!httpClient.begin(networkClient, url))
             return response.connectionFailed(url);
